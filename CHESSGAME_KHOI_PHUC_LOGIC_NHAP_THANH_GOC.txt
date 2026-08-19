@@ -1,0 +1,340 @@
+CHESSGAME - KHOI PHUC LOGIC NHAP THANH BAN DAU
+================================================
+
+MUC TIEU
+--------
+- Dua logic nhap thanh ve dung cach repo goc dang lam.
+- Piece.java GIU NGUYEN.
+- Hai ma nuoc nhap thanh van la:
+    4 = nhap thanh canh Vua (king side)
+    5 = nhap thanh canh Hau (queen side)
+- MainActivity.java van xu ly viec di Vua + Xe nhu repo goc.
+- Van giu yeu cau: neu Vua DANG BI CHIEU thi khong duoc nhap thanh.
+- Khong chen logic 4/5 vao filterLegalMoves() nua.
+
+================================================
+A. CHESS.JAVA - XOA PHAN CAN THIEP NHAP THANH
+================================================
+
+Tim ham:
+
+    private int[][] filterLegalMoves(...)
+
+Ban hien tai co the dang co doan:
+
+------------------------------------------------
+                // 4/5 = castling in the original project.
+                // A king is not allowed to castle while currently in check.
+                if ((moves[row][col] == 4 || moves[row][col] == 5)) {
+                    int movingPiece = game[oldRow][oldCol];
+
+                    if ((movingPiece == 12 && isKingInCheck(1)) ||
+                            (movingPiece == 6 && isKingInCheck(2))) {
+                        moves[row][col] = 0;
+                    }
+                }
+------------------------------------------------
+
+XOA TOAN BO DOAN TREN.
+
+Sau khi xoa, filterLegalMoves() chi nen loc:
+- 2 = nuoc di thuong
+- 3 = nuoc an quan
+
+Vi du phan cot loi nen la:
+
+------------------------------------------------
+    private int[][] filterLegalMoves(
+            int oldRow,
+            int oldCol,
+            int[][] moves) {
+
+        for (int row = 0; row < SIDE; row++) {
+            for (int col = 0; col < SIDE; col++) {
+
+                if (moves[row][col] == 2 ||
+                        moves[row][col] == 3) {
+
+                    if (!isLegalMove(
+                            oldRow,
+                            oldCol,
+                            row,
+                            col)) {
+
+                        moves[row][col] = 0;
+                    }
+                }
+            }
+        }
+
+        return moves;
+    }
+------------------------------------------------
+
+QUAN TRONG:
+KHONG xu ly 4/5 trong ham nay nua.
+
+================================================
+B. PIECE.JAVA - KHONG SUA
+================================================
+
+GIU NGUYEN logic nhap thanh goc trong:
+- blackKing(...)
+- whiteKing(...)
+
+Repo goc tao:
+
+    moves[row][col + 2] = 4;
+
+cho nhap thanh canh Vua.
+
+Va:
+
+    moves[row][col - 2] = 5;
+
+cho nhap thanh canh Hau.
+
+KHONG chen isKingInCheck(), isLegalMove(),
+hasAnyLegalMove() vao 2 ham King cua Piece.java.
+
+================================================
+C. MAINACTIVITY.JAVA - CHAN NHAP THANH KHI DANG BI CHIEU
+================================================
+
+Trong ham:
+
+    public void update(int row, int col)
+
+Tim dong dau tien:
+
+------------------------------------------------
+        int[][] possibleMoves =
+                chessGame.play(
+                        row,
+                        col,
+                        game[row][col]);
+------------------------------------------------
+
+NGAY SAU DONG DO, CHEN:
+
+------------------------------------------------
+        // Giu logic castling goc cua Piece/MainActivity.
+        // Chi bo 4/5 neu Vua hien tai dang bi chieu.
+        if (game[row][col] == 12 &&
+                chessGame.isKingInCheck(1)) {
+
+            for (int r = 0; r < Chess.SIDE; r++) {
+                for (int c = 0; c < Chess.SIDE; c++) {
+
+                    if (possibleMoves[r][c] == 4 ||
+                            possibleMoves[r][c] == 5) {
+
+                        possibleMoves[r][c] = 0;
+                    }
+                }
+            }
+        }
+
+        if (game[row][col] == 6 &&
+                chessGame.isKingInCheck(2)) {
+
+            for (int r = 0; r < Chess.SIDE; r++) {
+                for (int c = 0; c < Chess.SIDE; c++) {
+
+                    if (possibleMoves[r][c] == 4 ||
+                            possibleMoves[r][c] == 5) {
+
+                        possibleMoves[r][c] = 0;
+                    }
+                }
+            }
+        }
+------------------------------------------------
+
+LY DO:
+- Piece.java van sinh nuoc 4/5 dung nhu code goc.
+- MainActivity van xu ly 4/5 dung nhu code goc.
+- Chi khi Vua DANG bi chieu, 4/5 moi bi xoa.
+- Khong anh huong filterLegalMoves() cua nuoc 2/3.
+
+================================================
+D. MAINACTIVITY - KHOI PHUC 2 KHOI NHAP THANH GOC
+================================================
+
+Tim khoi:
+
+    if (currentGreen[row][col] == 4)
+
+No nen giu theo logic goc nhu sau:
+
+------------------------------------------------
+                if (currentGreen[row][col] == 4) {
+
+                    resetBackgrounds();
+
+                    game[row][6] = game[row][4];
+                    game[row][5] =
+                            game[row][4] == 6 ? 2 : 8;
+
+                    game[row][4] = 0;
+                    game[row][Chess.SIDE - 1] = 0;
+
+                    movePieces(row, 6);
+                    movePieces(row, 5);
+                    movePieces(row, 4);
+                    movePieces(row, Chess.SIDE - 1);
+
+                    currentGreen = possibleMoves;
+
+                    if (chessGame.getTurn() == 1) {
+
+                        chessGame.updateWhiteCastleLeft(false);
+                        chessGame.updateWhiteCastleRight(false);
+
+                    } else {
+
+                        chessGame.updateBlackCastleLeft(false);
+                        chessGame.updateBlackCastleRight(false);
+                    }
+
+                    chessGame.updateTurn();
+
+                    // NEU BAN DA THEM REPETITION:
+                    // chessGame.recordCurrentPosition();
+                }
+------------------------------------------------
+
+Tim khoi:
+
+    if (currentGreen[row][col] == 5)
+
+Khoi nay nen la:
+
+------------------------------------------------
+                if (currentGreen[row][col] == 5) {
+
+                    resetBackgrounds();
+
+                    game[row][2] = game[row][4];
+                    game[row][3] =
+                            game[row][4] == 6 ? 2 : 8;
+
+                    game[row][4] = 0;
+                    game[row][0] = 0;
+
+                    movePieces(row, 2);
+                    movePieces(row, 3);
+                    movePieces(row, 4);
+                    movePieces(row, 0);
+
+                    currentGreen = possibleMoves;
+
+                    if (chessGame.getTurn() == 1) {
+
+                        chessGame.updateWhiteCastleLeft(false);
+                        chessGame.updateWhiteCastleRight(false);
+
+                    } else {
+
+                        chessGame.updateBlackCastleLeft(false);
+                        chessGame.updateBlackCastleRight(false);
+                    }
+
+                    chessGame.updateTurn();
+
+                    // NEU BAN DA THEM REPETITION:
+                    // chessGame.recordCurrentPosition();
+                }
+------------------------------------------------
+
+NEU ban da co:
+    chessGame.recordCurrentPosition();
+
+sau updateTurn() de xu ly lap lai the co,
+thi GIU LAI dong do.
+
+================================================
+E. KHONG DOI PHAN HIEN THI 4/5
+================================================
+
+Trong vong lap to mau nuoc di, GIU:
+
+------------------------------------------------
+if (possibleMoves[r][c] == 2 ||
+        possibleMoves[r][c] == 4 ||
+        possibleMoves[r][c] == 5) {
+
+    buttons[r][c]
+            .setBackground(
+                    getDrawable(
+                            R.drawable.green_box));
+}
+------------------------------------------------
+
+4/5 van la o xanh nhu logic ban dau.
+
+================================================
+F. TEST NHAP THANH
+================================================
+
+TEST 1 - NHAP THANH CANH VUA
+----------------------------
+Don quan giua Vua va Xe canh phai.
+
+Vua va Xe chua tung di.
+
+Bam Vua.
+
+Ket qua:
+- o cach Vua 2 cot ben phai mau xanh.
+- bam o do:
+    Vua -> cot 6
+    Xe -> cot 5
+
+TEST 2 - NHAP THANH CANH HAU
+----------------------------
+Don quan giua Vua va Xe ben trai.
+
+Bam Vua.
+
+Ket qua:
+- o cach Vua 2 cot ben trai mau xanh.
+- bam o do:
+    Vua -> cot 2
+    Xe -> cot 3
+
+TEST 3 - VUA DANG BI CHIEU
+--------------------------
+Cho Vua bi chieu.
+
+Bam Vua.
+
+Ket qua:
+- KHONG co o nhap thanh 4/5.
+- cac nuoc Vua thoat chieu binh thuong van hien.
+
+================================================
+G. CAC PHAN KHONG DUNG TOI
+================================================
+
+KHONG SUA:
+- Piece.java
+- isKingInCheck()
+- isLegalMove()
+- isCheckmate()
+- isStalemate()
+- promotion
+- highlightCheckedKing()
+- 12 anh quan co
+- 4 file mau
+
+================================================
+LUU Y
+================================================
+
+Day la khoi phuc theo KIEU NHAP THANH BAN DAU cua repo:
+Piece.java tao ma 4/5, MainActivity.java di Vua + Xe.
+
+No KHONG tu dong bo sung luat "Vua khong duoc di xuyen qua o dang bi tan cong".
+Neu sau nay can dung chuan FIDE hon, nen them mot bo kiem tra rieng cho o trung
+gian, nhung KHONG nen chen lai vao Piece.java neu muon giu kien truc hien tai.
