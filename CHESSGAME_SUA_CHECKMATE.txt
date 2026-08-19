@@ -1,0 +1,174 @@
+CHESSGAME - SUA THEM CHECKMATE (CHIEU BI)
+==========================================
+
+MUC TIEU
+--------
+- Neu Vua dang bi chieu VA khong con bat ky nuoc hop le nao -> phan thua.
+- Giu nguyen logic cu toi da.
+- KHONG SUA Piece.java.
+- Chi sua Chess.java.
+- MainActivity.java KHONG CAN SUA THEM neu ban dang dung ban truoc.
+
+==================================================
+BUOC 1 - THEM HAM hasAnyLegalMove() VA isCheckmate()
+==================================================
+
+Mo Chess.java.
+
+Tim ham:
+    public int[] getKingPosition(int side)
+
+Sau khi ham getKingPosition(...) ket thuc, CHEN NGAY 2 HAM SAU:
+
+--------------------------------------------------
+    public boolean hasAnyLegalMove(int side) {
+
+        for (int row = 0; row < SIDE; row++) {
+            for (int col = 0; col < SIDE; col++) {
+
+                int p = game[row][col];
+
+                if (p == 0) {
+                    continue;
+                }
+
+                // side = 1 -> WHITE (7..12)
+                if (side == 1 && (p < 7 || p > 12)) {
+                    continue;
+                }
+
+                // side = 2 -> BLACK (1..6)
+                if (side == 2 && (p < 1 || p > 6)) {
+                    continue;
+                }
+
+                Piece testPiece = new Piece(row, col, p, game);
+                int[][] moves = testPiece.possibleMoves();
+
+                moves = filterLegalMoves(row, col, moves);
+
+                for (int r = 0; r < SIDE; r++) {
+                    for (int c = 0; c < SIDE; c++) {
+
+                        // Khi dang bi chieu, cac nuoc thoat chieu
+                        // thong thuong se la 2 (di) hoac 3 (an).
+                        if (moves[r][c] == 2 || moves[r][c] == 3) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+
+    public boolean isCheckmate(int side) {
+
+        return isKingInCheck(side) && !hasAnyLegalMove(side);
+    }
+--------------------------------------------------
+
+==================================================
+BUOC 2 - SUA HAM whoWon()
+==================================================
+
+Tim ham cu:
+
+    public int whoWon(){
+
+GIU NGUYEN phan code cu ben duoi, NHUNG CHEN 2 DIEU KIEN NAY
+NGAY SAU DAU { CUA HAM:
+
+--------------------------------------------------
+        // White bi chieu bi -> Black thang
+        if (isCheckmate(1)) {
+            return 1;
+        }
+
+        // Black bi chieu bi -> White thang
+        if (isCheckmate(2)) {
+            return 2;
+        }
+--------------------------------------------------
+
+Sau khi chen, dau ham se giong:
+
+--------------------------------------------------
+    public int whoWon(){
+
+        // White bi chieu bi -> Black thang
+        if (isCheckmate(1)) {
+            return 1;
+        }
+
+        // Black bi chieu bi -> White thang
+        if (isCheckmate(2)) {
+            return 2;
+        }
+
+        int winner = 0;
+
+        ...
+--------------------------------------------------
+
+KHONG XOA phan code whoWon() cu. De no lam fallback neu Vua bi an theo
+logic cu cua project.
+
+==================================================
+BUOC 3 - KHONG SUA MainActivity.java
+==================================================
+
+MainActivity.java hien da co:
+
+    if(chessGame.whoWon()!=0){
+        enableButtons(false);
+        showNewGameDialog();
+        ...
+    }
+
+Vi whoWon() bay gio da biet checkmate, MainActivity tu dong:
+- khoa ban co;
+- hien hop thoai Play again?;
+- tang diem ben thang.
+
+Khong can sua them.
+
+==================================================
+TEST NHANH
+==================================================
+
+Test Fool's Mate:
+
+Trang:
+1. f2 -> f3
+
+Den:
+... e7 -> e5
+
+Trang:
+2. g2 -> g4
+
+Den:
+... Qd8 -> h4#
+
+Ket qua mong doi:
+- Vua trang bi to do.
+- Trang khong con nuoc hop le thoat chieu.
+- chessGame.isCheckmate(1) = true.
+- whoWon() = 1.
+- hien "Black won".
+- ban co bi khoa va hien Play again?.
+
+==================================================
+LUU Y
+==================================================
+
+Ban nay giu logic hien tai toi da.
+
+En passant la truong hop dac biet (move = 7) va project goc quan ly quyen
+en passant o MainActivity, khong nam trong Chess.java. Do do ham checkmate
+nay uu tien cac nuoc thoat chieu thong thuong 2/3 de khong lam thay doi
+kien truc cu. Truong hop cuc hiem en passant la nuoc duy nhat thoat chieu
+chua duoc tinh trong ban va toi thieu nay.
