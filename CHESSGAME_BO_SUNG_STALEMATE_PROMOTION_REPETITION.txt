@@ -1,0 +1,578 @@
+CHESSGAME - BO SUNG LUAT HOA + PHONG CAP
+========================================
+
+MUC TIEU
+--------
+Bo sung 3 phan ma khong pha logic cu:
+1. Stalemate: ben den luot khong bi chieu nhung khong con nuoc hop le -> HOA.
+2. Promotion: Tot den cuoi ban co duoc chon Queen / Rook / Bishop / Knight.
+3. Fivefold repetition: cung mot the co lap lai 5 lan -> HOA tu dong.
+
+LUU Y QUAN TRONG
+----------------
+- Day la ban VA TOI THIEU, uu tien giu logic hien tai.
+- Piece.java KHONG CAN SUA cho 3 phan nay.
+- Chu yeu sua Chess.java va MainActivity.java.
+- Neu package cua ban khac com.example.chessgame thi KHONG copy dong package trong vi du.
+
+==================================================
+PHAN A - STALEMATE
+==================================================
+
+A1. Trong Chess.java, THEM ham sau gan cac ham:
+    isKingInCheck(...)
+    hasAnyLegalMove(...)
+    isCheckmate(...)
+
+--------------------------------------------------
+    public boolean isStalemate(int side) {
+        return !isKingInCheck(side) && !hasAnyLegalMove(side);
+    }
+--------------------------------------------------
+
+A2. THEM ham kiem tra hoa vao Chess.java:
+
+--------------------------------------------------
+    public boolean isDrawByStalemate() {
+
+        if (turn == 1) {
+            return isStalemate(1);
+        }
+
+        if (turn == 2) {
+            return isStalemate(2);
+        }
+
+        return false;
+    }
+--------------------------------------------------
+
+KHONG nen nhung stalemate vao whoWon(), vi whoWon() chi nen tra ve nguoi thang.
+Ta se xu ly hoa trong MainActivity.
+
+==================================================
+PHAN B - PHONG CAP TOT THANH 4 LOAI
+==================================================
+
+CODE CU cua ban co the dang co:
+
+    public int[][] upgradeBlackPawn(int row, int col) {
+        game[row][col] = 5;
+        return game;
+    }
+
+    public int[][] upgradeWhitePawn(int row, int col) {
+        game[row][col] = 11;
+        return game;
+    }
+
+Hay GIU 2 ham cu neu muon, nhung THEM 2 ham moi de chon quan:
+
+--------------------------------------------------
+    public int[][] upgradeBlackPawn(int row, int col, int piece) {
+        game[row][col] = piece;
+        return game;
+    }
+
+    public int[][] upgradeWhitePawn(int row, int col, int piece) {
+        game[row][col] = piece;
+        return game;
+    }
+--------------------------------------------------
+
+MA QUAN TRONG PROJECT GOC
+-------------------------
+BLACK:
+1 = Pawn
+2 = Rook
+3 = Knight
+4 = Bishop
+5 = Queen
+6 = King
+
+WHITE:
+7  = Pawn
+8  = Rook
+9  = Knight
+10 = Bishop
+11 = Queen
+12 = King
+
+==================================================
+B3. MAINACTIVITY.JAVA - BO TU DONG PHONG QUEEN
+==================================================
+
+Trong update(...), tim 2 khoi CU:
+
+--------------------------------------------------
+        if(game[row][col]==1&&row==7){
+            game = chessGame.upgradeBlackPawn(row,col);
+            movePieces(row,col);
+        }
+
+        if(game[row][col]==7&&row==0){
+            game = chessGame.upgradeWhitePawn(row,col);
+            movePieces(row,col);
+        }
+--------------------------------------------------
+
+THAY TOAN BO 2 KHOI TREN THANH:
+
+--------------------------------------------------
+        if(game[row][col] == 1 && row == 7){
+            showPromotionDialog(row, col, false);
+            return;
+        }
+
+        if(game[row][col] == 7 && row == 0){
+            showPromotionDialog(row, col, true);
+            return;
+        }
+--------------------------------------------------
+
+==================================================
+B4. THEM HAM showPromotionDialog() VAO MainActivity
+==================================================
+
+Dat ham nay TRUOC:
+    public void resetButtons()
+
+--------------------------------------------------
+    public void showPromotionDialog(final int row,
+                                    final int col,
+                                    final boolean white) {
+
+        final String[] pieces = {
+                "Queen",
+                "Rook",
+                "Bishop",
+                "Knight"
+        };
+
+        AlertDialog.Builder alert =
+                new AlertDialog.Builder(this);
+
+        alert.setTitle("Choose promotion");
+
+        alert.setCancelable(false);
+
+        alert.setItems(
+                pieces,
+                new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(
+                            DialogInterface dialog,
+                            int which) {
+
+                        int piece;
+
+                        if (white) {
+
+                            if (which == 0)
+                                piece = 11; // Queen
+                            else if (which == 1)
+                                piece = 8;  // Rook
+                            else if (which == 2)
+                                piece = 10; // Bishop
+                            else
+                                piece = 9;  // Knight
+
+                            game = chessGame.upgradeWhitePawn(
+                                    row,
+                                    col,
+                                    piece);
+
+                        } else {
+
+                            if (which == 0)
+                                piece = 5; // Queen
+                            else if (which == 1)
+                                piece = 2; // Rook
+                            else if (which == 2)
+                                piece = 4; // Bishop
+                            else
+                                piece = 3; // Knight
+
+                            game = chessGame.upgradeBlackPawn(
+                                    row,
+                                    col,
+                                    piece);
+                        }
+
+                        movePieces(row, col);
+
+                        highlightCheckedKing();
+
+                        checkGameEnd();
+                    }
+                });
+
+        alert.show();
+    }
+--------------------------------------------------
+
+==================================================
+PHAN C - GOM KIEM TRA KET THUC GAME
+==================================================
+
+De tranh lap code, THEM ham sau vao MainActivity.java:
+
+--------------------------------------------------
+    public void checkGameEnd() {
+
+        if (chessGame.whoWon() != 0) {
+
+            enableButtons(false);
+
+            showNewGameDialog();
+
+            if (chessGame.whoWon() == 1)
+                blackWins++;
+
+            if (chessGame.whoWon() == 2)
+                whiteWins++;
+
+            status.setText(
+                    chessGame.result()
+                            + "\n"
+                            + "Black Wins: "
+                            + blackWins
+                            + "\n"
+                            + "White Wins: "
+                            + whiteWins);
+
+            return;
+        }
+
+        if (chessGame.isDrawByStalemate()) {
+
+            enableButtons(false);
+
+            showDrawDialog("Stalemate");
+
+            return;
+        }
+
+        if (chessGame.isFivefoldRepetition()) {
+
+            enableButtons(false);
+
+            showDrawDialog("Draw by repetition");
+
+            return;
+        }
+    }
+--------------------------------------------------
+
+==================================================
+PHAN D - HOP THOAI HOA
+==================================================
+
+THEM ham sau vao MainActivity.java:
+
+--------------------------------------------------
+    public void showDrawDialog(String reason) {
+
+        AlertDialog.Builder alert =
+                new AlertDialog.Builder(this);
+
+        alert.setTitle("Draw");
+
+        alert.setMessage(
+                reason + "\nPlay again?");
+
+        PlayDialog playAgain =
+                new PlayDialog();
+
+        alert.setPositiveButton(
+                "YES",
+                playAgain);
+
+        alert.setNegativeButton(
+                "NO",
+                playAgain);
+
+        alert.show();
+    }
+--------------------------------------------------
+
+==================================================
+PHAN E - FIVEFOLD REPETITION
+==================================================
+
+E1. O dau Chess.java, THEM import:
+
+--------------------------------------------------
+import java.util.HashMap;
+--------------------------------------------------
+
+E2. Trong class Chess, THEM bien:
+
+--------------------------------------------------
+    private HashMap<String, Integer> positionHistory;
+--------------------------------------------------
+
+E3. Trong constructor Chess(), SAU:
+    game = new int[SIDE][SIDE];
+    resetGame();
+
+THEM:
+--------------------------------------------------
+        positionHistory = new HashMap<>();
+        recordCurrentPosition();
+--------------------------------------------------
+
+NEU constructor cua ban dang goi resetGame() ma resetGame() cung se clear lich su
+theo phan ben duoi, thi nen doi constructor thanh:
+
+--------------------------------------------------
+    public Chess() {
+        game = new int[SIDE][SIDE];
+        positionHistory = new HashMap<>();
+        resetGame();
+    }
+--------------------------------------------------
+
+==================================================
+E4. THEM HAM TAO KEY THE CO
+==================================================
+
+Them vao Chess.java:
+
+--------------------------------------------------
+    private String getPositionKey() {
+
+        StringBuilder key =
+                new StringBuilder();
+
+        for (int row = 0; row < SIDE; row++) {
+
+            for (int col = 0; col < SIDE; col++) {
+
+                key.append(game[row][col])
+                        .append(',');
+            }
+        }
+
+        // Ben den luot phai giong nhau
+        key.append("T")
+                .append(turn);
+
+        return key.toString();
+    }
+--------------------------------------------------
+
+LUU Y:
+Ban toi thieu nay moi tinh:
+- 64 o ban co
+- ben den luot
+
+Theo luat FIDE chuan, mot the co chi duoc xem la giong nhau neu ca quyen nhap thanh
+va kha nang en passant cung giong nhau. Neu muon chuan hon, xem PHAN H ben duoi.
+
+==================================================
+E5. THEM HAM GHI NHAN TRANG THAI
+==================================================
+
+--------------------------------------------------
+    public void recordCurrentPosition() {
+
+        String key =
+                getPositionKey();
+
+        Integer count =
+                positionHistory.get(key);
+
+        if (count == null)
+            count = 0;
+
+        positionHistory.put(
+                key,
+                count + 1);
+    }
+--------------------------------------------------
+
+==================================================
+E6. THEM HAM KIEM TRA 5 LAN
+==================================================
+
+--------------------------------------------------
+    public boolean isFivefoldRepetition() {
+
+        String key =
+                getPositionKey();
+
+        Integer count =
+                positionHistory.get(key);
+
+        return count != null
+                && count >= 5;
+    }
+--------------------------------------------------
+
+==================================================
+E7. SUA resetGame()
+==================================================
+
+O CUOI resetGame(), hien co:
+
+    turn = 1;
+
+SAU dong nay THEM:
+
+--------------------------------------------------
+        if (positionHistory != null) {
+            positionHistory.clear();
+            recordCurrentPosition();
+        }
+--------------------------------------------------
+
+==================================================
+E8. GHI NHAN SAU MOI NUOC DI
+==================================================
+
+QUAN TRONG:
+Phai record SAU KHI updateTurn(), vi key co ca ben den luot.
+
+Trong MainActivity.update(...), moi noi co:
+
+    chessGame.updateTurn();
+
+THI SAU dong do THEM:
+
+--------------------------------------------------
+                    chessGame.recordCurrentPosition();
+--------------------------------------------------
+
+Can lam cho cac truong hop:
+- nuoc di thuong
+- an quan
+- nhap thanh
+- en passant
+
+VI DU:
+
+--------------------------------------------------
+                    chessGame.updateTurn();
+                    chessGame.recordCurrentPosition();
+--------------------------------------------------
+
+==================================================
+PHAN F - GOI checkGameEnd() SAU MOI NUOC
+==================================================
+
+Trong MainActivity.update(...), hien ban co khoi CU:
+
+--------------------------------------------------
+        if(chessGame.whoWon()!=0){
+            ...
+        }
+--------------------------------------------------
+
+HAY XOA KHOI KIEM TRA THANG CU NAY VA THAY BANG:
+
+--------------------------------------------------
+        checkGameEnd();
+--------------------------------------------------
+
+Nen dat gan cuoi update(), TRUOC phan cap nhat pawn1/pawn2 neu logic hien tai cua
+ban cho phep.
+
+Neu ban khong muon xoa code cu, co the TAM THOI giu no va chen stalemate/
+repetition ben duoi, nhung de sach va khong lap thi nen dung checkGameEnd().
+
+==================================================
+PHAN G - RESET LICH SU SAU PLAY AGAIN
+==================================================
+
+PlayDialog dang goi:
+
+    chessGame.resetGame();
+
+resetGame() da clear positionHistory theo E7, nen KHONG CAN them gi.
+
+==================================================
+PHAN H - FIVEFOLD CHUAN HON (KHUYEN NGHI SAU)
+==================================================
+
+FIDE yeu cau cung the co phai tinh them:
+- ben den luot
+- quyen nhap thanh cua 2 ben
+- kha nang en passant
+
+Project hien tai luu trang thai castling trong Piece bang cac bien static va
+en passant lai nam trong MainActivity.
+
+Do do ban E ben tren la BAN TOI THIEU de han che pha kien truc.
+
+Neu muon chuan FIDE hon:
+1. Dua quyen castling ve Chess.java.
+2. Dua thong tin en passant ve Chess.java.
+3. Them cac gia tri nay vao getPositionKey().
+
+KHONG nen lam ngay neu muc tieu la giu logic cu.
+
+==================================================
+THU TU SUA KHUYEN NGHI
+==================================================
+
+1. A1 + A2 (stalemate)
+2. Build
+3. B (promotion 4 quan)
+4. Build + test
+5. C + D (gom xu ly ket thuc)
+6. Build
+7. E (fivefold repetition)
+8. Build
+9. Test tung phan
+
+==================================================
+TEST STALEMATE
+==================================================
+
+Dieu kien:
+- Ben den luot KHONG bi chieu
+- Khong co nuoc hop le nao
+
+Ket qua:
+- Draw
+- "Stalemate"
+- khoa ban co
+- hoi Play again?
+
+==================================================
+TEST PROMOTION
+==================================================
+
+Dua mot tot den hang cuoi.
+
+Ket qua:
+- hien 4 lua chon:
+  Queen
+  Rook
+  Bishop
+  Knight
+
+Chon quan nao thi quan tot doi thanh quan do.
+
+==================================================
+TEST REPETITION
+==================================================
+
+Lap lai mot the co qua lai cho toi khi cung position key xuat hien lan thu 5.
+
+Ket qua:
+- Draw by repetition
+- khoa ban co
+- hoi Play again?
+
+==================================================
+KHONG SUA
+==================================================
+- Piece.java
+- 12 anh quan
+- black_box.xml
+- white_box.xml
+- green_box.xml
+- red_box.xml
