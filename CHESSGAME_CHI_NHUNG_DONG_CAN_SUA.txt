@@ -1,0 +1,139 @@
+CHESSGAME - CAC DONG CAN SUA THEM
+=================================
+
+MUC TIEU
+--------
+1. Khi Vua bi chieu -> o cua Vua mau do.
+2. Khi Vua dang bi chieu -> khong duoc nhap thanh.
+3. Han che thay doi logic cu.
+
+===========================
+A. CHESS.JAVA
+===========================
+
+A1. Trong ham filterLegalMoves(...), NGAY SAU khoi:
+    if (moves[row][col] == 2 || moves[row][col] == 3) {
+        if (!isLegalMove(oldRow, oldCol, row, col)) {
+            moves[row][col] = 0;
+        }
+    }
+
+THEM:
+---------------------------
+                // 4/5 = castling in the original project.
+                // A king is not allowed to castle while currently in check.
+                if ((moves[row][col] == 4 || moves[row][col] == 5)) {
+                    int movingPiece = game[oldRow][oldCol];
+
+                    if ((movingPiece == 12 && isKingInCheck(1)) ||
+                            (movingPiece == 6 && isKingInCheck(2))) {
+                        moves[row][col] = 0;
+                    }
+                }
+---------------------------
+
+A2. Trong Chess.java, THEM ham sau TRUOC ham getGame():
+
+---------------------------
+    public int[] getKingPosition(int side) {
+        int king = side == 1 ? 12 : 6;
+
+        for (int row = 0; row < SIDE; row++) {
+            for (int col = 0; col < SIDE; col++) {
+                if (game[row][col] == king) {
+                    return new int[]{row, col};
+                }
+            }
+        }
+
+        return new int[]{-1, -1};
+    }
+---------------------------
+
+===========================
+B. MAINACTIVITY.JAVA
+===========================
+
+B1. Trong buildGuiByCode(), tim:
+    resetBackgrounds();
+    setContentView(gridLayout);
+
+THAY THANH:
+---------------------------
+        resetBackgrounds();
+        highlightCheckedKing();
+        setContentView(gridLayout);
+---------------------------
+
+B2. Trong update(...), gan CUOI HAM, sau khoi:
+    else {
+        pawn1.setForeground(getDrawable(R.drawable.white_pawn));
+        pawn2.setForeground(getDrawable(R.drawable.white_pawn));
+    }
+
+THEM:
+---------------------------
+        highlightCheckedKing();
+---------------------------
+
+B3. THEM NGUYEN HAM SAU vao MainActivity.java.
+Nen dat ngay TRUOC ham resetButtons():
+
+---------------------------
+    public void highlightCheckedKing() {
+        if (chessGame.isKingInCheck(1)) {
+            int[] kingPos = chessGame.getKingPosition(1);
+
+            if (kingPos[0] >= 0 && kingPos[1] >= 0) {
+                buttons[kingPos[0]][kingPos[1]]
+                        .setBackground(getDrawable(R.drawable.red_box));
+            }
+        }
+
+        if (chessGame.isKingInCheck(2)) {
+            int[] kingPos = chessGame.getKingPosition(2);
+
+            if (kingPos[0] >= 0 && kingPos[1] >= 0) {
+                buttons[kingPos[0]][kingPos[1]]
+                        .setBackground(getDrawable(R.drawable.red_box));
+            }
+        }
+    }
+---------------------------
+
+B4. Trong PlayDialog -> khi bam YES choi lai, tim:
+    resetButtons();
+    status.setText(...);
+
+CHEN GIUA 2 DONG DO:
+---------------------------
+                resetBackgrounds();
+                highlightCheckedKing();
+---------------------------
+
+===========================
+C. KHONG SUA
+===========================
+- Piece.java: KHONG SUA.
+- 12 anh quan co: KHONG SUA.
+- red_box.xml: KHONG SUA.
+- logic en passant/promotion: KHONG SUA.
+
+===========================
+THU TU LAM
+===========================
+1. Sua A1 trong Chess.java.
+2. Them A2 trong Chess.java.
+3. Ctrl+F9 build.
+4. Sua B1 trong MainActivity.java.
+5. Them B2.
+6. Them B3.
+7. Them B4.
+8. Ctrl+F9 build.
+9. Run va test.
+
+TEST
+----
+- Vua bi chieu -> o Vua phai mau do.
+- Dang bi chieu -> khong con o nhap thanh mau xanh.
+- Cac nuoc di cu van hoat dong nhu truoc.
