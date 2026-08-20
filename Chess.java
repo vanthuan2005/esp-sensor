@@ -1,6 +1,7 @@
 package com.example.chessgame;
 
 import java.util.HashMap;
+import java.util.ArrayList;
 
 public class Chess {
 
@@ -23,6 +24,16 @@ public class Chess {
     private int selectedPiece = 0;
 
     private HashMap<String, Integer> positionHistory;
+
+    // One-level undo snapshot.
+    private int[][] undoGame;
+    private int undoTurn;
+    private boolean undoBlackCastleRight;
+    private boolean undoBlackCastleLeft;
+    private boolean undoWhiteCastleRight;
+    private boolean undoWhiteCastleLeft;
+    private HashMap<String, Integer> undoPositionHistory;
+    private boolean hasUndoState = false;
 
     public Chess() {
         game = new int[SIDE][SIDE];
@@ -539,6 +550,65 @@ public class Chess {
         return "If you're seeing this, something's gone wrong.";
     }
 
+
+    public void saveStateForUndo() {
+
+        undoGame = new int[SIDE][SIDE];
+
+        for (int row = 0; row < SIDE; row++) {
+            for (int col = 0; col < SIDE; col++) {
+                undoGame[row][col] = game[row][col];
+            }
+        }
+
+        undoTurn = turn;
+
+        undoBlackCastleRight = blackCastleRight;
+        undoBlackCastleLeft = blackCastleLeft;
+        undoWhiteCastleRight = whiteCastleRight;
+        undoWhiteCastleLeft = whiteCastleLeft;
+
+        undoPositionHistory =
+                new HashMap<>(positionHistory);
+
+        hasUndoState = true;
+    }
+
+    public boolean undoLastMove() {
+
+        if (!hasUndoState || undoGame == null) {
+            return false;
+        }
+
+        for (int row = 0; row < SIDE; row++) {
+            for (int col = 0; col < SIDE; col++) {
+                game[row][col] = undoGame[row][col];
+            }
+        }
+
+        turn = undoTurn;
+
+        blackCastleRight = undoBlackCastleRight;
+        blackCastleLeft = undoBlackCastleLeft;
+        whiteCastleRight = undoWhiteCastleRight;
+        whiteCastleLeft = undoWhiteCastleLeft;
+
+        positionHistory =
+                new HashMap<>(undoPositionHistory);
+
+        selectedRow = -1;
+        selectedCol = -1;
+        selectedPiece = 0;
+
+        hasUndoState = false;
+
+        return true;
+    }
+
+    public boolean canUndo() {
+        return hasUndoState;
+    }
+
     public void resetGame() {
 
         for (int row = 0; row < SIDE; row++) {
@@ -592,6 +662,10 @@ public class Chess {
         selectedRow = -1;
         selectedCol = -1;
         selectedPiece = 0;
+
+        undoGame = null;
+        undoPositionHistory = null;
+        hasUndoState = false;
 
         if (positionHistory != null) {
 

@@ -9,6 +9,8 @@ import android.graphics.Point;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
@@ -42,6 +44,64 @@ public class MainActivity extends AppCompatActivity {
     private int[] blackPassant;
 
     private int boardSquareSize;
+
+
+    // 10-minute chess clock for each side.
+    private static final long START_TIME_MS = 10 * 60 * 1000L;
+
+    private long whiteTimeMs = START_TIME_MS;
+    private long blackTimeMs = START_TIME_MS;
+
+    private long undoWhiteTimeMs;
+    private long undoBlackTimeMs;
+
+    private int[] undoWhitePassant;
+    private int[] undoBlackPassant;
+
+    private final Handler timerHandler =
+            new Handler(Looper.getMainLooper());
+
+    private boolean timerRunning = true;
+
+    private final Runnable timerRunnable =
+            new Runnable() {
+                @Override
+                public void run() {
+
+                    if (!timerRunning) {
+                        return;
+                    }
+
+                    if (chessGame != null &&
+                            chessGame.whoWon() == 0 &&
+                            !chessGame.isDrawByStalemate() &&
+                            !chessGame.isFivefoldRepetition()) {
+
+                        if (chessGame.getTurn() == 1) {
+                            whiteTimeMs -= 1000;
+
+                            if (whiteTimeMs <= 0) {
+                                whiteTimeMs = 0;
+                                onTimeOut(false);
+                                return;
+                            }
+
+                        } else {
+                            blackTimeMs -= 1000;
+
+                            if (blackTimeMs <= 0) {
+                                blackTimeMs = 0;
+                                onTimeOut(true);
+                                return;
+                            }
+                        }
+
+                        updateTimerViews();
+                    }
+
+                    timerHandler.postDelayed(this, 1000);
+                }
+            };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -150,7 +210,7 @@ public class MainActivity extends AppCompatActivity {
                         "Opponent");
 
         topTimer =
-                createTimer("05:00");
+                createTimer("10:00");
 
         topCard.addView(
                 topPlayerName,
@@ -298,7 +358,7 @@ public class MainActivity extends AppCompatActivity {
                         "You");
 
         bottomTimer =
-                createTimer("05:00");
+                createTimer("10:00");
 
         bottomCard.addView(
                 bottomPlayerName,
@@ -336,9 +396,9 @@ public class MainActivity extends AppCompatActivity {
                 createActionButton(
                         "NEW GAME");
 
-        Button resetSelection =
+        Button undoButton =
                 createActionButton(
-                        "CLEAR");
+                        "UNDO");
 
         LinearLayout.LayoutParams actionButtonParams =
                 new LinearLayout.LayoutParams(
@@ -357,7 +417,7 @@ public class MainActivity extends AppCompatActivity {
                 actionButtonParams);
 
         actions.addView(
-                resetSelection,
+                undoButton,
                 actionButtonParams);
 
         root.addView(
@@ -376,20 +436,13 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
 
-        resetSelection.setOnClickListener(
+        undoButton.setOnClickListener(
                 new View.OnClickListener() {
 
                     @Override
                     public void onClick(View v) {
 
-                        oldRow = -1;
-                        oldCol = -1;
-
-                        currentGreen =
-                                new int[Chess.SIDE][Chess.SIDE];
-
-                        resetBackgrounds();
-                        highlightCheckedKing();
+                        undoMove();
                     }
                 });
 
@@ -398,6 +451,9 @@ public class MainActivity extends AppCompatActivity {
         updateStatusUi();
 
         setContentView(scrollView);
+
+        timerHandler.removeCallbacks(timerRunnable);
+        timerHandler.postDelayed(timerRunnable, 1000);
     }
 
     private LinearLayout createPlayerCard() {
@@ -616,6 +672,7 @@ public class MainActivity extends AppCompatActivity {
 
             if (currentGreen[row][col] == 2) {
 
+                saveUndoState();
                 resetBackgrounds();
 
                 if (oldRow == 1 &&
@@ -656,6 +713,7 @@ public class MainActivity extends AppCompatActivity {
 
             else if (currentGreen[row][col] == 3) {
 
+                saveUndoState();
                 resetBackgrounds();
 
                 game[row][col] =
@@ -680,6 +738,7 @@ public class MainActivity extends AppCompatActivity {
 
             else if (currentGreen[row][col] == 4) {
 
+                saveUndoState();
                 resetBackgrounds();
 
                 game[row][6] =
@@ -714,6 +773,7 @@ public class MainActivity extends AppCompatActivity {
 
             else if (currentGreen[row][col] == 5) {
 
+                saveUndoState();
                 resetBackgrounds();
 
                 game[row][2] =
@@ -750,6 +810,7 @@ public class MainActivity extends AppCompatActivity {
                             (chessGame.getTurn() == 2 &&
                                     blackPassant[col] == 1))) {
 
+                saveUndoState();
                 resetBackgrounds();
 
                 game[row][col] =
@@ -826,6 +887,136 @@ public class MainActivity extends AppCompatActivity {
 
         checkGameEnd();
         updateStatusUi();
+    }
+
+    // =========================================================
+    // UNDO + TIMER
+    // =========================================================
+
+    private void saveUndoState() {
+
+        chessGame.saveStateForUndo();
+
+        undoWhiteTimeMs = whiteTimeMs;
+        undoBlackTimeMs = blackTimeMs;
+
+        undoWhitePassant =
+                whitePassant.clone();
+
+        undoBlackPassant =
+                blackPassant.clone();
+    }
+
+    private void undoMove() {
+
+        if (!chessGame.undoLastMove()) {
+            return;
+        }
+
+        game = chessGame.getGame();
+
+        whiteTimeMs = undoWhiteTimeMs;
+        blackTimeMs = undoBlackTimeMs;
+
+        if (undoWhitePassant != null) {
+            whitePassant =
+                    undoWhitePassant.clone();
+        }
+
+        if (undoBlackPassant != null) {
+            blackPassant =
+                    undoBlackPassant.clone();
+        }
+
+        oldRow = -1;
+        oldCol = -1;
+
+        currentGreen =
+                new int[Chess.SIDE][Chess.SIDE];
+
+        timerRunning = true;
+
+        enableButtons(true);
+        resetButtons();
+        resetBackgrounds();
+        highlightCheckedKing();
+        updateTimerViews();
+        updateStatusUi();
+    }
+
+    private void updateTimerViews() {
+
+        if (topTimer != null) {
+            topTimer.setText(
+                    formatTime(blackTimeMs));
+        }
+
+        if (bottomTimer != null) {
+            bottomTimer.setText(
+                    formatTime(whiteTimeMs));
+        }
+    }
+
+    private String formatTime(long timeMs) {
+
+        long totalSeconds =
+                Math.max(0, timeMs) / 1000;
+
+        long minutes =
+                totalSeconds / 60;
+
+        long seconds =
+                totalSeconds % 60;
+
+        return String.format(
+                "%02d:%02d",
+                minutes,
+                seconds);
+    }
+
+    private void onTimeOut(
+            boolean blackLost) {
+
+        timerRunning = false;
+        enableButtons(false);
+
+        String winner =
+                blackLost
+                        ? "WHITE WINS"
+                        : "BLACK WINS";
+
+        status.setText(
+                winner + " - TIME");
+
+        AlertDialog.Builder alert =
+                new AlertDialog.Builder(this);
+
+        alert.setTitle(winner);
+
+        alert.setMessage(
+                "Time out\nPlay again?");
+
+        PlayDialog playAgain =
+                new PlayDialog();
+
+        alert.setPositiveButton(
+                "YES",
+                playAgain);
+
+        alert.setNegativeButton(
+                "NO",
+                playAgain);
+
+        alert.show();
+    }
+
+    @Override
+    protected void onDestroy() {
+
+        timerHandler.removeCallbacks(
+                timerRunnable);
+
+        super.onDestroy();
     }
 
     // =========================================================
@@ -960,6 +1151,7 @@ public class MainActivity extends AppCompatActivity {
                     chessGame.whoWon();
 
             enableButtons(false);
+            timerRunning = false;
 
             if (winner == 1) {
                 blackWins++;
@@ -977,6 +1169,7 @@ public class MainActivity extends AppCompatActivity {
         if (chessGame.isDrawByStalemate()) {
 
             enableButtons(false);
+            timerRunning = false;
 
             updateStatusUi();
 
@@ -988,6 +1181,7 @@ public class MainActivity extends AppCompatActivity {
         if (chessGame.isFivefoldRepetition()) {
 
             enableButtons(false);
+            timerRunning = false;
 
             updateStatusUi();
 
@@ -1286,8 +1480,8 @@ public class MainActivity extends AppCompatActivity {
 
         // Static timer labels for UI only.
         // Timer logic can be added later without touching chess rules.
-        topTimer.setText("05:00");
-        bottomTimer.setText("05:00");
+        updateTimerViews();
+        
     }
 
     private void resetWholeGame() {
@@ -1305,6 +1499,10 @@ public class MainActivity extends AppCompatActivity {
 
         oldRow = -1;
         oldCol = -1;
+
+        whiteTimeMs = START_TIME_MS;
+        blackTimeMs = START_TIME_MS;
+        timerRunning = true;
 
         currentGreen =
                 new int[Chess.SIDE][Chess.SIDE];
