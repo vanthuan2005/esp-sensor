@@ -15,6 +15,7 @@ import android.os.Looper;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.GridLayout;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -182,14 +183,8 @@ public class MainActivity extends AppCompatActivity {
         // HEADER
         // -----------------------------
 
-        LinearLayout header =
-                new LinearLayout(this);
-
-        header.setOrientation(
-                LinearLayout.HORIZONTAL);
-
-        header.setGravity(
-                Gravity.CENTER_VERTICAL);
+        FrameLayout header =
+                new FrameLayout(this);
 
         TextView title =
                 new TextView(this);
@@ -204,6 +199,18 @@ public class MainActivity extends AppCompatActivity {
         title.setGravity(
                 Gravity.CENTER);
 
+        FrameLayout.LayoutParams titleLayoutParams =
+                new FrameLayout.LayoutParams(
+                        FrameLayout.LayoutParams.MATCH_PARENT,
+                        dp(52));
+
+        titleLayoutParams.gravity =
+                Gravity.CENTER;
+
+        header.addView(
+                title,
+                titleLayoutParams);
+
         TextView soundIcon =
                 new TextView(this);
 
@@ -213,7 +220,7 @@ public class MainActivity extends AppCompatActivity {
                 Gravity.CENTER);
 
         soundIcon.setPadding(
-                dp(10),
+                dp(6),
                 dp(6),
                 dp(4),
                 dp(6));
@@ -227,29 +234,28 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
 
-        header.addView(
-                title,
-                new LinearLayout.LayoutParams(
-                        0,
-                        LinearLayout.LayoutParams.WRAP_CONTENT,
-                        1f));
+        FrameLayout.LayoutParams soundLayoutParams =
+                new FrameLayout.LayoutParams(
+                        dp(52),
+                        dp(52));
+
+        soundLayoutParams.gravity =
+                Gravity.END | Gravity.CENTER_VERTICAL;
 
         header.addView(
                 soundIcon,
-                new LinearLayout.LayoutParams(
-                        dp(52),
-                        dp(52)));
+                soundLayoutParams);
 
-        LinearLayout.LayoutParams titleParams =
+        LinearLayout.LayoutParams headerParams =
                 new LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT);
+                        dp(52));
 
-        titleParams.bottomMargin = dp(18);
+        headerParams.bottomMargin = dp(18);
 
         root.addView(
                 header,
-                titleParams);
+                headerParams);
 
         // -----------------------------
         // TOP INFO CARD - BLACK
