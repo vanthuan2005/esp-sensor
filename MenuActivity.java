@@ -40,7 +40,7 @@ public class MenuActivity extends AppCompatActivity {
                 dp(36));
 
         // =========================
-        // LOGO / TITLE
+        // LOGO BLOCK - TOP CENTER
         // =========================
 
         LinearLayout logoBlock =
@@ -50,7 +50,7 @@ public class MenuActivity extends AppCompatActivity {
                 LinearLayout.VERTICAL);
 
         logoBlock.setGravity(
-                Gravity.CENTER);
+                Gravity.CENTER_HORIZONTAL);
 
         TextView crown =
                 new TextView(this);
@@ -72,25 +72,28 @@ public class MenuActivity extends AppCompatActivity {
                 Typeface.BOLD);
         title.setGravity(Gravity.CENTER);
 
+        TextView sub =
+                new TextView(this);
+
+        sub.setText("CHOOSE GAME MODE");
+        sub.setTextColor(
+                Color.parseColor("#9D9FA6"));
+        sub.setTextSize(14);
+        sub.setGravity(Gravity.CENTER);
+
         logoBlock.addView(crown);
         logoBlock.addView(title);
-
-        LinearLayout.LayoutParams logoParams =
-                new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT);
-
-        logoParams.topMargin = dp(18);
-        logoParams.bottomMargin = dp(42);
+        logoBlock.addView(sub);
 
         root.addView(
                 logoBlock,
-                logoParams);
+                new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT));
 
-        // =========================
-        // SPACE TO CENTER BUTTONS
-        // =========================
-
+        // Khoang trong giua logo va cum button.
+        // Hai Space co cung weight de tam cum button
+        // nam dung giua phan man hinh con lai.
         Space topSpace =
                 new Space(this);
 
@@ -102,8 +105,17 @@ public class MenuActivity extends AppCompatActivity {
                         1f));
 
         // =========================
-        // BUTTONS
+        // BUTTON BLOCK - CENTER
         // =========================
+
+        LinearLayout buttonBlock =
+                new LinearLayout(this);
+
+        buttonBlock.setOrientation(
+                LinearLayout.VERTICAL);
+
+        buttonBlock.setGravity(
+                Gravity.CENTER);
 
         Button human =
                 createButton(
@@ -113,13 +125,19 @@ public class MenuActivity extends AppCompatActivity {
                 createButton(
                         "♞  PLAY WITH BOT");
 
-        root.addView(
+        buttonBlock.addView(
                 human,
                 buttonParams());
 
-        root.addView(
+        buttonBlock.addView(
                 bot,
                 buttonParams());
+
+        root.addView(
+                buttonBlock,
+                new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT));
 
         Space bottomSpace =
                 new Space(this);
