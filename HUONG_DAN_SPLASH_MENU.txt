@@ -1,0 +1,15 @@
+1. Tao SplashActivity.java cung package voi MainActivity.
+2. Tao MenuActivity.java cung package voi MainActivity.
+3. Copy 2 file code moi vao.
+4. MainActivity.java GIU NGUYEN.
+5. Sua AndroidManifest theo file ANDROID_MANIFEST_CAN_THEM.txt.
+6. Build -> Make Project -> Run.
+
+LUONG:
+Splash 2 giay -> Menu
+PLAY WITH FRIEND -> MainActivity
+PLAY WITH BOT -> tam thoi Coming soon
+SOUND -> chinh am luong media
+
+Neu package cua ban khac com.example.chessgame,
+sua dong package dau 2 file cho giong MainActivity.

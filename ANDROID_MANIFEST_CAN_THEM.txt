@@ -1,0 +1,24 @@
+GIU cac phan khac trong AndroidManifest.xml.
+
+Dam bao co:
+
+<activity
+    android:name=".MainActivity"
+    android:exported="false" />
+
+<activity
+    android:name=".MenuActivity"
+    android:exported="false" />
+
+<activity
+    android:name=".SplashActivity"
+    android:exported="true">
+    <intent-filter>
+        <action android:name="android.intent.action.MAIN" />
+        <category android:name="android.intent.category.LAUNCHER" />
+    </intent-filter>
+</activity>
+
+QUAN TRONG:
+- Xoa MAIN/LAUNCHER khoi MainActivity neu dang co.
+- Chi SplashActivity la launcher.
