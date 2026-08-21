@@ -1,0 +1,25 @@
+CAP NHAT MENU + ICON LOA
+======================
+
+1. MenuActivity.java
+- Thay toan bo file cu bang MenuActivity.java moi.
+- SOUND da bi xoa khoi menu.
+- Menu chi con:
+  PLAY WITH FRIEND
+  PLAY WITH BOT
+- Hai nut duoc can xuong giua man hinh bang Space + weight.
+
+2. MainActivity.java
+- Thay toan bo file hien tai bang MainActivity.java moi.
+- Ben phai chu CHESS GAME co icon loa.
+- Bam icon loa -> hien thanh dieu chinh am luong.
+- Ban co, undo, timer 10 phut va logic game giu nguyen.
+
+3. Piece.java / Chess.java
+- KHONG can thay doi cho yeu cau giao dien nay.
+
+4. Package
+Neu package khac com.example.chessgame, sua dong package dau file.
+
+5. Build
+Build -> Make Project -> Run.

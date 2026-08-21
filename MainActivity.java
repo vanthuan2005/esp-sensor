@@ -8,6 +8,7 @@ import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -17,6 +18,7 @@ import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
+import android.widget.SeekBar;
 import android.widget.Space;
 import android.widget.TextView;
 
@@ -44,6 +46,8 @@ public class MainActivity extends AppCompatActivity {
     private int[] blackPassant;
 
     private int boardSquareSize;
+
+    private AudioManager audioManager;
 
 
     // 10-minute chess clock for each side.
@@ -106,6 +110,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        audioManager =
+                (AudioManager)
+                        getSystemService(AUDIO_SERVICE);
 
         chessGame = new Chess();
         game = chessGame.getGame();
@@ -174,6 +182,15 @@ public class MainActivity extends AppCompatActivity {
         // HEADER
         // -----------------------------
 
+        LinearLayout header =
+                new LinearLayout(this);
+
+        header.setOrientation(
+                LinearLayout.HORIZONTAL);
+
+        header.setGravity(
+                Gravity.CENTER_VERTICAL);
+
         TextView title =
                 new TextView(this);
 
@@ -184,7 +201,44 @@ public class MainActivity extends AppCompatActivity {
                 Typeface.DEFAULT,
                 Typeface.BOLD);
 
-        title.setGravity(Gravity.CENTER);
+        title.setGravity(
+                Gravity.CENTER);
+
+        TextView soundIcon =
+                new TextView(this);
+
+        soundIcon.setText("🔊");
+        soundIcon.setTextSize(24);
+        soundIcon.setGravity(
+                Gravity.CENTER);
+
+        soundIcon.setPadding(
+                dp(10),
+                dp(6),
+                dp(4),
+                dp(6));
+
+        soundIcon.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        showSoundDialog();
+                    }
+                });
+
+        header.addView(
+                title,
+                new LinearLayout.LayoutParams(
+                        0,
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        1f));
+
+        header.addView(
+                soundIcon,
+                new LinearLayout.LayoutParams(
+                        dp(52),
+                        dp(52)));
 
         LinearLayout.LayoutParams titleParams =
                 new LinearLayout.LayoutParams(
@@ -194,7 +248,7 @@ public class MainActivity extends AppCompatActivity {
         titleParams.bottomMargin = dp(18);
 
         root.addView(
-                title,
+                header,
                 titleParams);
 
         // -----------------------------
@@ -563,6 +617,81 @@ public class MainActivity extends AppCompatActivity {
 
         return (int)
                 (value * density + 0.5f);
+    }
+
+    private void showSoundDialog() {
+
+        LinearLayout container =
+                new LinearLayout(this);
+
+        container.setOrientation(
+                LinearLayout.VERTICAL);
+
+        container.setPadding(
+                dp(24),
+                dp(10),
+                dp(24),
+                dp(8));
+
+        TextView label =
+                new TextView(this);
+
+        label.setText("Game volume");
+        label.setTextSize(16);
+        label.setTextColor(
+                Color.parseColor("#222222"));
+
+        SeekBar seekBar =
+                new SeekBar(this);
+
+        int maxVolume =
+                audioManager.getStreamMaxVolume(
+                        AudioManager.STREAM_MUSIC);
+
+        int currentVolume =
+                audioManager.getStreamVolume(
+                        AudioManager.STREAM_MUSIC);
+
+        seekBar.setMax(maxVolume);
+        seekBar.setProgress(currentVolume);
+
+        seekBar.setOnSeekBarChangeListener(
+                new SeekBar.OnSeekBarChangeListener() {
+
+                    @Override
+                    public void onProgressChanged(
+                            SeekBar seekBar,
+                            int progress,
+                            boolean fromUser) {
+
+                        if (fromUser) {
+
+                            audioManager.setStreamVolume(
+                                    AudioManager.STREAM_MUSIC,
+                                    progress,
+                                    0);
+                        }
+                    }
+
+                    @Override
+                    public void onStartTrackingTouch(
+                            SeekBar seekBar) {
+                    }
+
+                    @Override
+                    public void onStopTrackingTouch(
+                            SeekBar seekBar) {
+                    }
+                });
+
+        container.addView(label);
+        container.addView(seekBar);
+
+        new AlertDialog.Builder(this)
+                .setTitle("Sound")
+                .setView(container)
+                .setPositiveButton("OK", null)
+                .show();
     }
 
     // =========================================================
