@@ -43,6 +43,15 @@ public class MenuActivity extends AppCompatActivity {
         // LOGO / TITLE
         // =========================
 
+        LinearLayout logoBlock =
+                new LinearLayout(this);
+
+        logoBlock.setOrientation(
+                LinearLayout.VERTICAL);
+
+        logoBlock.setGravity(
+                Gravity.CENTER);
+
         TextView crown =
                 new TextView(this);
 
@@ -63,18 +72,20 @@ public class MenuActivity extends AppCompatActivity {
                 Typeface.BOLD);
         title.setGravity(Gravity.CENTER);
 
-        TextView sub =
-                new TextView(this);
+        logoBlock.addView(crown);
+        logoBlock.addView(title);
 
-        sub.setText("CHOOSE GAME MODE");
-        sub.setTextColor(
-                Color.parseColor("#9D9FA6"));
-        sub.setTextSize(14);
-        sub.setGravity(Gravity.CENTER);
+        LinearLayout.LayoutParams logoParams =
+                new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT);
 
-        root.addView(crown);
-        root.addView(title);
-        root.addView(sub);
+        logoParams.topMargin = dp(18);
+        logoParams.bottomMargin = dp(42);
+
+        root.addView(
+                logoBlock,
+                logoParams);
 
         // =========================
         // SPACE TO CENTER BUTTONS

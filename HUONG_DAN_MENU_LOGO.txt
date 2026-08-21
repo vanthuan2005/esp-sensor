@@ -1,0 +1,16 @@
+CAP NHAT MENU ACTIVITY
+=====================
+
+CHI SUA GIAO DIEN MENU:
+- Xoa dong "CHOOSE GAME MODE".
+- Gom icon ♛ va chu CHESS thanh 1 cum logo.
+- Cum logo can giua ngang.
+- Logo nam o phan tren, ngay phia tren khu vuc 2 button.
+- 2 button PLAY WITH FRIEND / PLAY WITH BOT van giu o giua man hinh.
+- Khong sua logic Intent hay cac activity khac.
+
+CACH DUNG:
+1. Mo MenuActivity.java hien tai.
+2. Ctrl+A -> dan toan bo MenuActivity.java moi.
+3. Neu package khac com.example.chessgame thi giu package cua project.
+4. Build -> Make Project -> Run.
