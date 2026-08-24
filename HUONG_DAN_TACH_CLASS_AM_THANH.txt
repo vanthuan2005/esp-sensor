@@ -1,0 +1,121 @@
+HUONG DAN TICH HOP AM THANH - PHIEN BAN TACH CLASS RIENG
+=========================================================
+
+MUC TIEU
+--------
+Phan xu ly am thanh KHONG con nhung truc tiep trong MainActivity nua.
+Toan bo viec load, play, va release am thanh da duoc tach ra thanh class rieng:
+- SoundManager.java
+
+1. CAC FILE CAN THAY / THEM
+---------------------------
+A. THAY FILE:
+- app/src/main/java/com/example/chessgame/MainActivity.java
+
+B. THEM FILE MOI:
+- app/src/main/java/com/example/chessgame/SoundManager.java
+
+C. THEM THU MUC AM THANH:
+- app/src/main/res/raw/
+
+2. CAC FILE AM THANH CAN COPY
+-----------------------------
+Copy tat ca file sau vao:
+app/src/main/res/raw/
+
+- move_self.wav
+- move_opponent.wav
+- capture.wav
+- move_check.wav
+- castle.wav
+- promote.wav
+- illegal.wav
+- game_start.wav
+- game_end.wav
+- game_draw.wav
+- game_lose.wav
+- tenseconds.wav
+
+Neu project chua co thu muc raw:
+- Chuot phai vao res
+- New -> Android Resource Directory
+- Resource type: raw
+- OK
+
+3. KIEN TRUC MOI
+----------------
+MainActivity.java:
+- chi goi cac ham cua SoundManager
+- khong con giu SoundPool, sound id, va logic phat am thanh chi tiet
+
+SoundManager.java:
+- initSounds(): load toan bo file am thanh
+- playMoveResult(): quyet dinh phat am move/capture/castle/promote/check
+- playIllegal(), playGameStart(), playGameEnd(), ...
+- release(): giai phong SoundPool
+
+4. LUU Y VE LOGIC AM THANH
+--------------------------
+- Neu nuoc di gay CHECK:
+  SoundManager se uu tien phat move_check.wav
+  thay vi phat move/capture/castle/promote.
+
+- Neu khong phai CHECK:
+  se phat dung am thanh tuong ung voi su kien:
+  move_self / move_opponent / capture / castle / promote
+
+- Ket thuc van, hoa, thua bot, canh bao 10 giay:
+  duoc goi bang cac ham rieng cua SoundManager.
+
+5. CAC BUOC THAY FILE
+---------------------
+Buoc 1:
+Mo project Android Studio.
+
+Buoc 2:
+Di den:
+app/src/main/java/com/example/chessgame/
+
+Buoc 3:
+- thay MainActivity.java bang file trong goi nay
+- them file moi SoundManager.java vao cung package
+
+Buoc 4:
+Di den:
+app/src/main/res/
+
+Buoc 5:
+- tao raw neu chua co
+- copy tat ca file .wav vao res/raw/
+
+Buoc 6:
+Build lai project:
+- File -> Sync Project with Gradle Files
+- Build -> Clean Project
+- Build -> Rebuild Project
+
+6. KHONG CAN SUA
+----------------
+Khong can sua cac file sau:
+- Chess.java
+- Piece.java
+- FenConverter.java
+- ChessApiClient.java
+- MenuActivity.java
+- SplashActivity.java
+- AndroidManifest.xml
+- build.gradle
+
+7. LOI ICH CUA CACH TACH CLASS
+-----------------------------
+- MainActivity gon hon
+- de bao tri
+- de doi file am thanh hoac them loai am thanh moi
+- sau nay neu muon bat/tat sound, them mute, doi volume game,
+  hoac doi SoundPool sang MediaPlayer thi chi can sua SoundManager.java
+
+8. NEU MUON DOI AM THANH SAU NAY
+--------------------------------
+Chi can giu dung ten file trong res/raw.
+Vi du doi move_self.wav bang file khac nhung van ten move_self.wav,
+thi khong can sua code Java.
